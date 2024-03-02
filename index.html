@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TimeTrackHub</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
+        body{
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-image: url(clk-bg.jpg);
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position:center ;
+            background-attachment: fixed;
+        }
+
+        #container{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #tnd{
+            font-family: monospace;
+            font-weight: bold;
+            color: hsl(189.13deg 47.86% 89.13%);
+            text-align: center;
+            backdrop-filter: blur(3px);
+            background-color: rgba(192, 191, 191, 0.126);
+            width: 100%;
+        }
+
+        #clock{
+            font-size: 7em;
+            padding: 5px;
+            margin-bottom: 2px;
+        }
+
+        #date{
+            font-size: 4em;
+            padding: 5px;
+            margin-top: 1px;
+            margin-bottom: 3px;
+        }
+
+        #clock-container, #stopwatch-cntnr {
+            margin-top: 20px; /* Added to reduce the distance */
+            margin-bottom: 40px;
+        }
+        
+        #clock, #display {
+            margin-bottom: 20px; /* Added to reduce the distance */
+        }
+        
+        #stopwatch {
+            padding: 20px; /* Added to reduce the distance */
+        }
+        
+
+        
+        #stopwatch{
+            border: 5px solid;
+            text-align: center;
+            border-radius: 50px;
+            align-items: center;
+            background-color: rgb(255, 255, 255);
+            backdrop-filter: blur(3px);
+            background-color: rgba(192, 191, 191, 0.126);
+        }
+        
+        h1{
+            font-family: 'Roboto';
+            font-size: 4em;
+            margin-bottom: 5px;
+            text-align: center;
+            color: hsl(40, 78%, 69%);
+        }
+        
+        #display{
+            font-family: monospace;
+            font-size: 6em;
+            font-weight: bold;
+            padding: 30px;
+            color: hsl(189.13deg 47.86% 89.13%)
+        }
+        
+        #controls button{
+            font-size: 2em;
+            font-weight: bold;
+            text-align: center;
+            margin-left: 10px;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: none;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.4s ease;
+        }
+        
+        #startBtn{
+            background-color: hsl(120, 100%, 55%);
+        }
+        
+        #startBtn:hover{
+            background-color: hsl(120, 100%, 45%);
+        }
+        
+        #stopBtn{
+            background-color: hsl(0, 100%, 55%);
+        }
+        
+        #stopBtn:hover{
+            background-color: hsl(0, 100%, 45%);
+        }
+        
+        #resetBtn{
+            background-color: hsl(197, 100%, 55%);
+        }
+        
+        #resetBtn:hover{
+            background-color: hsl(197, 100%, 45%);
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="tnd">
+            <div id="clock">00:00:00</div>
+            <div id="date"></div>
+        </div>
+        <h1>⏱StopWatch⏱</h1>
+        <div id="stopwatch">
+            <div id="display">00:00:00:00</div>
+            <div id="controls">
+                <button id="startBtn" onclick="start()">Start</button>
+                <button id="stopBtn" onclick="stop()">Stop</button>
+                <button id="resetBtn" onclick="reset()">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Clock Program
+        function clock(){
+            const now = new Date();
+            let hours = now.getHours();
+            const meridiem = hours>=12 ? 'PM' : 'AM';
+            hours = hours%12 || 12;
+            hours = hours.toString().padStart(2,`0`);
+            let minute = now.getMinutes().toString().padStart(2,`0`);
+            let seconds = now.getSeconds().toString().padStart(2,`0`);
+            const time  = `${hours}:${minute}:${seconds} ${meridiem}`;
+            const months = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "Jun.", "Jul.", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."];
+            const date = `${now.getDate()} ${months[now.getMonth()]}, ${now.getFullYear()}`;
+
+            document.getElementById("clock").textContent = time;
+            document.getElementById("date").textContent = date;
+        }
+
+        clock();
+        setInterval(clock, 1000);
+
+
+        // Stopwatch Program
+        const display = document.getElementById("display");
+        let timer = null;
+        let startTime = 0;
+        let elapsedTime = 0;
+        let isRunning = false;
+
+        function start(){
+            if(!isRunning){
+                startTime = Date.now() - elapsedTime;
+                timer = setInterval(update, 10);
+                isRunning = true;
+            }
+        }
+
+        function stop(){
+            if(isRunning){
+                clearInterval(timer);
+                elapsedTime = Date.now() - startTime;
+                isRunning = false;
+            }
+        }
+
+        function reset(){
+            clearInterval(timer);
+            startTime = 0;
+            elapsedTime = 0;
+            isRunning = false;
+            display.textContent = '00:00:00:00'; // Reset display text
+        }
+
+        function update(){
+            const currentTime = Date.now();
+            elapsedTime = currentTime - startTime;
+
+            let hours = Math.floor(elapsedTime / (1000 * 60 * 60));
+            let minutes = Math.floor(elapsedTime / (1000 * 60) % 60);
+            let seconds = Math.floor(elapsedTime / 1000 % 60);
+            let milliseconds = Math.floor(elapsedTime % 1000 / 10);
+
+            // Add leading zeros to each value
+            hours = String(hours).padStart(2, '0');
+            minutes = String(minutes).padStart(2, '0');
+            seconds = String(seconds).padStart(2, '0');
+            milliseconds = String(milliseconds).padStart(2, '0');
+
+            // Update the display
+            display.textContent = `${hours}:${minutes}:${seconds}:${milliseconds}`;
+        }
+    </script>
+</body>
+</html>
